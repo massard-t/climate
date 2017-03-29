@@ -17,7 +17,7 @@ __d_blue() {
 }
 
 __d_green() {
-	printf "%b$*%b" "$GREEN" "${PLAIN}"
+	printf "%b$*%b" "${GREEN}" "${PLAIN}"
 }
 
 __d_yellow() {
@@ -28,5 +28,11 @@ __d_red() {
 	printf "%b$*%b" "${RED}" "${PLAIN}"
 }
 
+__d_bold_red() {
+        printf "%b$*%b" "${RED_BOLD}" "${PLAIN}"
+}
 
+__d_bold_green() {
+	printf "%b$*%b" "${GREEN_BOLD}" "${PLAIN}"
+}
 
