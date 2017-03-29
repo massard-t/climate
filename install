@@ -24,6 +24,9 @@ ctrl_c() {
     exit
 }
 
+# shellcheck disable=SC1091
+source utils.sh
+
 spinner() {
     local spin="\\|/-"
     local i=0
@@ -38,18 +41,18 @@ spinner() {
 
 yesno() {
     while true; do
-        printf "${BLUE}"
-        printf " • $1 "
+        printf " • "
+        __d_blue "$1"
 
         if [[ $2 == "no" ]]; then
-            printf "${PLAIN}[yes | ${GREEN_BOLD}no${PLAIN}] "
-            read ans
+            printf "[ yes | %bno%b ] " "${GREEN_BOLD}" "${PLAIN}"
+            read -r ans
             if [[ -z "$ans" ]]; then
                 ans="no"
             fi
         else
-            printf "${PLAIN}[${GREEN_BOLD}yes${PLAIN} | no] "
-            read ans
+            printf "[ %byes%b | no] " "${GREEN_BOLD}" "${PLAIN}"
+            read -r ans
             if [[ -z "$ans" ]]; then
                 ans="yes"
             fi
@@ -60,22 +63,24 @@ yesno() {
         elif [[ $ans == "no" ]] || [[ $ans == "n" ]]; then
             return 1
         else
-            printf "   ${RED}Invalid answer. Please answer with 'yes' or 'no'."
+            printf "   "
+            __d_red "Invalid answer. Please answer with 'yes' or 'no'."
         fi
     done
 }
 
 ask() {
-    printf "${PLAIN} • ${BLUE}$2 "
+    printf " • "
+    __d_blue "$2"
 
-    printf "${PLAIN}[${GREEN_BOLD}$3${PLAIN}] "
+    printf "[%b%s%b] " "${GREEN_BOLD}" "$3" "${PLAIN}"
 
-    read ans
+    read -r ans
     if [[ -z "$ans" ]]; then
         ans="$3"
     fi
 
-    eval "$1='"$ans"'"
+    eval "$1='$ans'"
 }
 
 command_exists () {
@@ -83,8 +88,9 @@ command_exists () {
 }
 
 system_verify() {
-    if ! command_exists $1; then
-        printf "${PLAIN} • ${RED}$1 missing.${PLAIN} "
+    if ! command_exists "$1"; then
+        printf " • "
+        __d_red "$1 missing. "
 
         if command_exists apt-get || command_exists yum || command_exists dnf; then
             printf "Installing...  "
@@ -92,33 +98,34 @@ system_verify() {
             if command_exists dnf && [[ "$3" != "-" ]]; then
                 sudo dnf install -y "$3"  > /dev/null 2>&1 &
                 spinner $!
-                printf "\b${GREEN}Installed!"
+                __d_green "\bInstalled!"
 
             elif command_exists yum && [[ "$3" != "-" ]]; then
                 sudo yum install -y "$3"  > /dev/null 2>&1 &
                 spinner $!
-                printf "\b${GREEN}Installed!"
+                __d_green "\bInstalled!"
 
             elif command_exists apt-get && [[ "$2" != "-" ]]; then
                 sudo apt-get install -y "$2"  > /dev/null 2>&1 &
                 spinner $!
-                printf "\b${GREEN}Installed!"
+                __d_green "\bInstalled!"
 
             else
-                printf "${RED}Package doesn't exist for your arch. Please install it manually."
+                __d_red "Package doesn't exist for your arch. Please install it manually."
             fi
 
         else
             printf "Please install it manually."
         fi
     else
-        printf "${PLAIN} • ${GREEN}$1 exists!${PLAIN}"
+        printf " • "
+        __d_green "$1 exists!"
     fi
     printf "\n"
 }
 
 npm_verify() {
-    if ! command_exists $1; then
+    if ! command_exists "$1"; then
         printf "${PLAIN} • ${RED}$1 missing.${PLAIN} "
 
         if command_exists npm; then
