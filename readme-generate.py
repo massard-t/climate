@@ -5,7 +5,7 @@ with open("climate") as file:
 
 print("# Climate\n")
 
-print("![image](https://i.imgur.com/Ma1UIe7.png)\n")
+print("![image](https://i.imgur.com/Vgca4yS.png)\n")
 
 print("""**Climate** is the ultimate command line tool for Linux. It
 provides a huge number of command line options for developers to
@@ -57,7 +57,7 @@ print("""
 `climate` has the following dependencies:
 
 ```
-upower wget curl rar unzip 7z dig git python pip node npm fdupes glances speedtest sensors sshfs http-server is-up
+upower wget curl rar unzip 7z dig git python pip node npm fdupes glances speedtest sensors sshfs http-server httpstat is-up
 ```
 
 The installation command should automatically install these for `apt`-based systems
@@ -68,6 +68,11 @@ and `yum`-based systems (and of course, `dnf`). For others, please install them 
 # commands
 print("""
 ## Commands
+
+`climate` has command autocompletion. So don't worry, you don't need to
+remember all this. Also, you can just execute `climate help` to display
+this list of commands.
+
 """)
 begun = False
 print("Command | Description")
@@ -92,9 +97,24 @@ for line in lines:
 print("""\n
 ## License
 
-Thanks to [guarinogabriel/Mac-CLI](https://github.com/guarinogabriel/Mac-CLI)
-for the idea.
+```
+    Climate - command line tools for Linux developers
+    Copyright (C) 2016  Adhityaa Chandrasekar
 
-See the [LICENSE](LICENSE.md) file for license rights and limitations (AGPL).
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+```
+
+See the [LICENSE](LICENSE) file for more details.
 
 """)

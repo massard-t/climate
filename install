@@ -121,7 +121,7 @@ npm_verify() {
     if ! command_exists $1; then
         printf "${PLAIN} • ${RED}$1 missing.${PLAIN} "
 
-        if [[ -n "$(which npm)" ]]; then
+        if command_exists npm; then
             printf "Installing...  "
 
             sudo npm install -g "$2"  > /dev/null 2>&1 &
@@ -141,7 +141,7 @@ pip_verify() {
     if ! command_exists $1; then
         printf "${PLAIN} • ${RED}$1 missing.${PLAIN} "
 
-        if [[ -n "$(which npm)" ]]; then
+        if command_exists pip; then
             printf "Installing...  "
 
             sudo pip install "$2"  > /dev/null 2>&1 &
@@ -155,6 +155,58 @@ pip_verify() {
         printf "${PLAIN} • ${GREEN}$1 exists!${PLAIN}"
     fi
     printf "\n"
+}
+
+setup_autocomplete() {
+
+    #Create auto complete file
+cat > $CLIMATE_COMPLETION << EOF
+        if [[ ! -z "\$ZSH_VERSION" ]]
+        then
+            autoload compinit
+            autoload bashcompinit
+            compinit
+            bashcompinit
+        fi
+
+        _climate() 
+        {
+            local cur prev opts
+            COMPREPLY=()
+            cur="\${COMP_WORDS[COMP_CWORD]}"
+            prev="\${COMP_WORDS[COMP_CWORD-1]}"
+            opts=\$(cat $CLIMATE_SRC 2>/dev/null |\
+                grep -P 'shelp\s"[^"]+"\s*"[^"]+"' |\
+                cut -d"\"" -f2 |\
+                cut -d" " -f1)
+
+            if [[ ! -z "\$opts" ]] && [[ "\$prev" = "$CLIMATE_EXEC" ]]
+            then
+                COMPREPLY=( \$(compgen -W "\${opts}" -- \${cur}) )
+            fi
+        }
+        complete -F _climate climate
+EOF
+	
+    #Setup bash
+    bashrc=$(eval echo "~$(logname)")/.bashrc
+    if [[ -f "$bashrc" ]]; then
+        if ! grep -Fxq "source $CLIMATE_COMPLETION" $bashrc
+        then
+            printf "\nsource %s" $CLIMATE_COMPLETION >> $bashrc
+            source $CLIMATE_COMPLETION
+        fi
+    fi
+
+    #Setup ZSH
+    zshrc=$(eval echo "~$(logname)")/.zshrc
+    if [[ -f "$zshrc" ]]; then
+        if ! grep -Fxq "source $CLIMATE_COMPLETION" $zshrc
+        then
+            printf "\nsource %s" $CLIMATE_COMPLETION >> $zshrc
+            source $CLIMATE_COMPLETION
+        fi
+    fi
 }
 
 main() {
@@ -218,9 +270,13 @@ main() {
     tail -n +3 "$CUR_DIR/climate" >> $CLIMATE_SRC
     chmod +x $CLIMATE_SRC
 
+    #Creates the auto-completion file
+    CLIMATE_COMPLETION="/etc/bash_completion.d/climate_completion"
+    setup_autocomplete
+
     printf "\nGreat. Now, let's check if you have the all requirements:\n\n"
 
-    #             command      Debian based    RPM based
+    #             command           Debian based    RPM based
     system_verify "upower"          "upower"        "upower"
     system_verify "curl"            "curl"          "curl"
     system_verify "rar"             "rar"           "-"
@@ -231,18 +287,21 @@ main() {
     system_verify "git"             "git-all"       "git-all"
     system_verify "python"          "python"        "python"
     system_verify "pip"             "python-pip"    "python-pip"
+    system_verify "node"            "nodejs-legacy" "nodejs"
     system_verify "npm"             "npm"           "npm"
     system_verify "fdupes"          "fdupes"        "fdupes"
     system_verify "glances"         "glances"       "glances"
     system_verify "sensors"         "lm-sensors"    "lm_sensors"
     system_verify "sshfs"           "sshfs"         "fuse-sshfs"
     system_verify "gawk"            "gawk"          "gawk"
+    system_verify "jq"              "jq"            "jq"
 
     npm_verify "http-server"   "http-server"
     npm_verify "is-up"         "is-up-cli"
     npm_verify "is-online"     "is-online-cli"
 
     pip_verify "speedtest"     "speedtest-cli"
+    pip_verify "httpstat"      "httpstat"
 
     printf "\nNeat! You're all set. Run 'climate' to see the whole list "
     printf "of commands supported. Enjoy!${PLAIN}\n"
